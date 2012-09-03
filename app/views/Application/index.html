@@ -1,0 +1,53 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+<h1>${play.Play.configuration.getProperty("application.name")}</h1>
+
+#{if me}
+    <h3>You're ${me.get("name").getAsString()} on Facebook</h3>
+    <hr>
+    <h3>Post an Event</h3>
+ 
+    #{form @Application.postEvent()}
+        #{ifErrors}
+            #{if !flash['ID']}
+                <p style="background-color: red; color: white;">Error(s) found!</p>
+            #{/if}
+        #{/ifErrors}
+        <input type="text" name="name" id="name" placeholder="Name"/><br/>
+        <input type="text" name="start_time" id="start_time" placeholder="Start Time"/><br/>
+        <input type="submit" value="Submit your event" />
+    #{/form}
+    <hr>
+    <h2>Events</h2>
+    <ul>
+        #{list items:myEvents.data, as:'event'}
+            <li>
+                ${event.start_time.getAsString()} -> ${event.name.getAsString()}
+                <ul>
+                    #{if event.feed != null}
+                        #{list items:event.feed.data, as:'feed'}
+                            <li>${feed.message.getAsString()}</li>
+                        #{/list}
+                    #{/if}
+                    <li>
+                        #{form @Application.postPost(event.id.getAsString())}
+                            #{ifErrors}
+                                #{if flash['ID'] == event.id.getAsString()}
+                                    <p style="background-color: red; color: white;">Error(s) found!</p>
+                                #{/if}
+                            #{/ifErrors}
+                            
+                            <input type="text" name="post" id="post" placeholder="Write something..."/>
+                            <input type="submit" value="Post" />
+                        #{/form}
+                    </li>
+                </ul>
+            </li>
+        #{/list}
+    </ul>
+#{/if}
+#{else}
+    <a href="@{auth()}">login</a>
+#{/else}
+
